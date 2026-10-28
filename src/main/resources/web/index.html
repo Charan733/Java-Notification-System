@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f1e9">
+  <meta name="description" content="A hands-on notification routing console.">
+  <title>Signal Desk — Java Notification System</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Signal Desk">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 13.5h3l2-7 4 12 2.5-8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="brand-name">signal desk <span>/ java notifications</span></span>
+      </div>
+      <div class="system-status"><span class="status-dot" aria-hidden="true"></span><span id="connection-status">connecting</span></div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Notification routing · live sandbox</p>
+          <h1 id="page-title">Make a message<br>mean something.</h1>
+          <p class="intro-copy">Create a topic, gather the right people, then send a message through the channel they prefer. Every delivery lands in the trail below.</p>
+        </div>
+        <div class="intro-meta"><strong>THE ROUTE</strong>Topic → subscribers →<br>preferred channel</div>
+      </section>
+
+      <div id="page-error" class="error-box" role="alert" hidden></div>
+      <div id="content" class="dashboard" aria-busy="true">
+        <section class="panel" aria-labelledby="topics-title">
+          <div class="panel-head">
+            <div><span class="panel-kicker">01 / Organize</span><h2 class="panel-title" id="topics-title">Topics</h2></div>
+            <span class="count-pill" id="topic-count" aria-label="Topic count">—</span>
+          </div>
+          <div class="panel-body">
+            <div id="topics-list" class="topic-list" aria-live="polite"><div class="loading-box"><div class="skeleton"></div><div class="skeleton"></div></div></div>
+            <form id="topic-form" class="add-topic">
+              <label class="sr-only" for="topic-name">New topic name</label>
+              <input class="field" id="topic-name" name="name" maxlength="80" placeholder="e.g. product-updates" required>
+              <button class="button" type="submit"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Create topic</button>
+            </form>
+          </div>
+        </section>
+
+        <div class="right-stack">
+          <section class="panel" aria-labelledby="people-title">
+            <div class="panel-head">
+              <div><span class="panel-kicker">02 / Audience</span><h2 class="panel-title" id="people-title">People & subscriptions</h2></div>
+              <span class="count-pill" id="user-count" aria-label="User count">—</span>
+            </div>
+            <div class="panel-body">
+              <div id="users-list" class="user-list" aria-live="polite"><div class="loading-box"><div class="skeleton"></div><div class="skeleton"></div></div></div>
+              <form id="user-form" class="add-user">
+                <label class="sr-only" for="user-name">Recipient name</label>
+                <input class="field" id="user-name" name="name" maxlength="80" placeholder="Recipient name" required>
+                <label class="sr-only" for="user-channel">Preferred delivery channel</label>
+                <select class="field select-field" id="user-channel" name="channel" required>
+                  <option value="EMAIL">Email</option><option value="SMS">SMS</option><option value="PUSH">Push</option>
+                </select>
+                <button class="button secondary" type="submit">Add person</button>
+              </form>
+              <div class="subscribe-block">
+                <div class="sub-heading"><span>Manage a subscription</span></div>
+                <form id="subscription-form" class="subscribe-form">
+                  <label class="sr-only" for="subscription-topic">Topic</label>
+                  <select class="field select-field" id="subscription-topic" name="topic" required><option value="">Choose topic</option></select>
+                  <label class="sr-only" for="subscription-user">Person</label>
+                  <select class="field select-field" id="subscription-user" name="user" required><option value="">Choose person</option></select>
+                  <button class="button ghost" id="subscription-action" type="submit" disabled>Subscribe</button>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel publish-panel" aria-labelledby="publish-title">
+            <div class="panel-head">
+              <div><span class="panel-kicker">03 / Send</span><h2 class="panel-title" id="publish-title">Publish a message</h2></div>
+              <span class="count-pill" aria-hidden="true">→</span>
+            </div>
+            <div class="panel-body">
+              <form id="publish-form" class="publish-form">
+                <label for="publish-topic">Send to topic
+                  <select class="field select-field" id="publish-topic" name="topic" required><option value="">Choose a topic</option></select>
+                </label>
+                <label for="publish-message">Your message
+                  <textarea class="field" id="publish-message" name="message" maxlength="500" placeholder="What should subscribers know?" required></textarea>
+                </label>
+                <div class="publish-footer">
+                  <span class="helper" id="publish-helper">Subscribers receive this on their preferred channel.</span>
+                  <button class="button" type="submit">Publish message <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h11m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel delivery-panel" aria-labelledby="delivery-title">
+          <div class="panel-head">
+            <div><span class="panel-kicker">04 / Delivery trail</span><h2 class="panel-title" id="delivery-title">Recent deliveries</h2></div>
+            <div class="delivery-head-right"><span class="delivery-live">Activity log</span><span class="count-pill" id="delivery-count">0</span></div>
+          </div>
+          <div class="panel-body">
+            <div id="deliveries-list" class="delivery-list" aria-live="polite"><div class="loading-box"><div class="skeleton"></div><div class="skeleton"></div></div></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span id="toast-message"></span>
+  </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Java Notification System"
+description = "A deployable notification demo built with plain Java, using observer and strategy patterns to manage topic subscriptions and simulated email, SMS, and push deliveries through a simple web interface."
+version = "1.0.0"
+id = "artifacts/java-notification-system"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18225
+
+[services.development]
+run = "pnpm --filter @workspace/java-notification-system run dev"
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/java-notification-system", "run", "build"]
+
+[services.production.run]
+args = ["java", "--add-modules", "jdk.httpserver", "-Dnotification.webRoot=artifacts/java-notification-system/build/web", "-cp", "artifacts/java-notification-system/build/classes", "com.acme.notifications.Main", "--server"]
+
+[services.production.run.env]
+PORT = "18225"
+
+[services.production.health.startup]
+path = "/notify-api/health"
+
+[services.env]
+PORT = "18225"
+BASE_PATH = "/"
